@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recipe APP</title>
+  <link rel="shortcut icon" href="images/logo.jpg" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: '#22c55e',
+            accentSoft: '#4ade80',
+            darkBg: '#020617',
+            cardBg: '#020617',
+          },
+          boxShadow: {
+            glow: '0 0 40px rgba(34, 197, 94, 0.3)',
+          },
+          animation: {
+            fade: 'fadeIn .5s ease-out',
+            slide: 'slideUp .6s ease-out',
+            float: 'float 4s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+            slideUp: { '0%': { transform: 'translateY(30px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
+            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col">
+  <!-- Gradient background decoration -->
+  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-32 -left-24 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl"></div>
+    <div class="absolute -bottom-32 -right-24 h-64 w-64 rounded-full bg-purple-500/30 blur-3xl"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 backdrop-blur bg-slate-950/70 border-b border-slate-800/70 shadow-sm animate-fade">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-lime-400 flex items-center justify-center shadow-glow animate-float">
+          <span class="text-xl">🍽️</span>
+        </div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <span class="bg-gradient-to-r from-emerald-400 via-lime-300 to-emerald-500 bg-clip-text text-transparent">
+              Recipe Finder
+            </span>
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">Discover meals powered by MealSDB API</p>
+        </div>
+      </div>
+      <div class="flex w-full md:w-1/2 gap-2 sm:gap-3">
+        <input id="searchInput" type="text" placeholder="Search recipes (e.g. chicken, pasta)..."
+          class="flex-1 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-slate-900/80 border border-slate-700/80
+                 focus:ring-2 focus:ring-accent focus:border-accent outline-none
+                 text-sm sm:text-base placeholder:text-slate-500
+                 transition-shadow transition-colors duration-200" />
+        <button id="searchBtn"
+          class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-400
+                 text-slate-900 text-sm sm:text-base font-semibold shadow-md shadow-emerald-500/30
+                 hover:shadow-glow hover:from-emerald-400 hover:to-lime-300
+                 active:scale-95 transition-transform transition-shadow duration-150 whitespace-nowrap">
+          Search
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="flex-grow">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+      <!-- LEFT: RECIPES -->
+      <div class="animate-slide">
+        <div class="flex items-center justify-between mb-4 sm:mb-5">
+          <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <span>🔍 Recipes</span>
+            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+              Live search
+            </span>
+          </h2>
+        </div>
+        <div id="loader" class="space-y-4 hidden mb-6">
+          <div class="h-24 sm:h-28 bg-slate-900/80 rounded-2xl animate-pulse"></div>
+          <div class="h-24 sm:h-28 bg-slate-900/80 rounded-2xl animate-pulse"></div>
+          <div class="h-24 sm:h-28 bg-slate-900/80 rounded-2xl animate-pulse"></div>
+        </div>
+        <ul id="recipeList" class="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 text-sm"></ul>
+        <div id="emptyState" class="mt-8 text-center text-slate-500 text-sm">
+          <p class="mb-1">Start by searching for a recipe above.</p>
+          <p class="text-xs text-slate-600">Tip: Try “chicken”, “pasta”, or “burger”.</p>
+        </div>
+      </div>
+      <!-- RIGHT: DETAILS -->
+      <div class="animate-slide">
+        <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-5">📖 Details</h2>
+        <div class="lg:sticky lg:top-28">
+          <div id="recipeDetailsContainer"
+            class="bg-slate-950/90 rounded-3xl p-5 sm:p-6 border border-slate-800/80 shadow-xl min-h-[260px]
+                   transition-all duration-200">
+            <div class="h-full flex flex-col items-center justify-center text-center text-slate-400 text-sm">
+              <p class="mb-1">Select a recipe card to view full details.</p>
+              <p class="text-xs text-slate-600">Ingredients and instructions will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-950/90 border-t border-slate-800/80 mt-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 text-center text-slate-400 text-xs sm:text-sm">
+      <h3 class="text-slate-200 font-semibold mb-1 tracking-wide uppercase text-[0.7rem] sm:text-xs">
+        Recipe App
+      </h3>
+      <p class="text-[0.7rem] sm:text-xs text-slate-500">
+        © 2025 Recipe App. Developed by Salman. Powered by
+        <a href="https://www.MealSDB.com" target="_blank" class="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
+          MealSDB API
+        </a>.
+      </p>
+    </div>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script src="app.js"></script>
+
+  <style>
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background-color: rgba(148, 163, 184, 0.6);
+      border-radius: 999px;
+    }
+  </style>
+</body>
+</html>
